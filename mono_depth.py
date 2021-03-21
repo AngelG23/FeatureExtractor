@@ -25,6 +25,10 @@ class MonoDepth(nn.Module):
         self.block6_up = self._make_block(64)
 
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        
+        self.avgpool = nn.AdaptiveAvgPool2d(output_size=(1,1))
+        self.fc = nn.Linear(in_features=64, out_features=10, bias=True)
+        self.SoftMax = nn.LogSoftmax(dim=-1)
 
     def _make_block(self, filters, dilation=2):
 
@@ -88,6 +92,11 @@ class MonoDepth(nn.Module):
         av1 = (add1 + add2) / 2
 
         x = (b1 + b2 + av1)/3
+        
+        x = self.avgpool(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc(x)
+        x = self.SoftMax(x)
 
         return x
 
