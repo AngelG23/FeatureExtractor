@@ -18,11 +18,11 @@ class MonoDepth(nn.Module):
         self.relu1 = nn.ReLU(inplace=False)
 
         self.block1_up = self._make_block(64)
-        self.block2_up = self._make_block(64)
-        self.block3_up = self._make_block(64)
-        self.block4_up = self._make_block(64)
-        self.block5_up = self._make_block(64)
-        self.block6_up = self._make_block(64)
+        self.block2_up = self._make_block(128)
+        self.block3_up = self._make_block(256)
+        self.block4_up = self._make_block(512)
+        self.block5_up = self._make_block(1024)
+        self.block6_up = self._make_block(2048)
 
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         
@@ -38,7 +38,7 @@ class MonoDepth(nn.Module):
             layers.append(conv(filters, filters, dilation))
             layers.append(nn.ReLU(inplace=False))
 
-        layers.append(conv(filters, filters))
+        layers.append(conv(filters, filters*2))
         layers.append(nn.ReLU(inplace=False))
 
         return nn.Sequential(*layers)
@@ -50,6 +50,8 @@ class MonoDepth(nn.Module):
 
         b1 = self.block1_up(av0)
         b2 = self.block1_up(av0)
+        
+        av0 = av0.view(av0.size(0), -1)
 
         add1 = b1 + av0
         add2 = b2 + av0
